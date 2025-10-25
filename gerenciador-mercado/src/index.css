@@ -66,25 +66,42 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
   
-}/* container principal */
+}
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  /* Remover display:flex e place-items */
+}
+
+/* container principal */
 .layout {
+  flex-direction: row; /* garante que o menu fique à esquerda */
   display: flex;         /* coloca o menu e o conteúdo lado a lado */
   height: 100vh;         /* ocupa a tela toda */
   margin: 0;
 }
 
-/* menu lateral à esquerda */
 .menu-lateral {
   width: 250px;
   background-color: #72e4a2;
   padding: 20px;
   box-sizing: border-box;
+  position: fixed;      /* fixa o menu */
+  top: 0;
+  left: 0;
+  height: 100vh;        /* ocupa toda a altura da tela */
 }
 
-/* conteúdo principal ao lado */
-.conteudo {
-  flex: 1;                /* ocupa o restante do espaço */
-  padding: 20px;
+.conteudo { 
   background-color: #f4f4f4;
-  color: #222;
+  color: #9c2727;
+  height: 100vh;          
+  margin-left: 250px;     
+  width: calc(100% - 250px); /* ocupa todo o espaço restante */
+  padding: 20px;          
+  box-sizing: border-box;
 }
+
+
+
