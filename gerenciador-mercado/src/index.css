@@ -65,4 +65,26 @@ button:focus-visible {
   button {
     background-color: #f9f9f9;
   }
+  
+}/* container principal */
+.layout {
+  display: flex;         /* coloca o menu e o conteúdo lado a lado */
+  height: 100vh;         /* ocupa a tela toda */
+  margin: 0;
+}
+
+/* menu lateral à esquerda */
+.menu-lateral {
+  width: 250px;
+  background-color: #72e4a2;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* conteúdo principal ao lado */
+.conteudo {
+  flex: 1;                /* ocupa o restante do espaço */
+  padding: 20px;
+  background-color: #f4f4f4;
+  color: #222;
 }
