@@ -34,7 +34,7 @@ export default function ProductModal({ isOpen, onClose, onSave, product }) {
         <div className="form-row">
           <div className="col">
             <label>Nome</label>
-            <input type="text" value={nome} onChange={e=>setNome(e.target.value)} />
+            <input type="text" value={nome} placeholder="Nome do produto" onChange={e=>setNome(e.target.value)} />
           </div>
           <div className="col">
             <label>Categoria</label>
@@ -50,17 +50,17 @@ export default function ProductModal({ isOpen, onClose, onSave, product }) {
         <div className="form-row">
           <div className="col">
             <label>Preço (R$)</label>
-            <input type="number" min="0" step="0.01" value={preco} onChange={e=>setPreco(e.target.value)} />
+            <input type="number" placeholder="ex:12,99" min="0" step="0.01" value={preco} onChange={e=>setPreco(e.target.value)} />
           </div>
           <div className="col">
             <label>Estoque</label>
-            <input type="number" min="0" step="1" value={estoque} onChange={e=>setEstoque(e.target.value)} />
+            <input type="number" placeholder="Quantidade em estoque" min="0" step="1" value={estoque} onChange={e=>setEstoque(e.target.value)} />
           </div>
         </div>
 
         <div>
           <label>Descrição</label>
-          <textarea value={descricao} onChange={e=>setDescricao(e.target.value)} />
+          <textarea value={descricao} placeholder="Descrição do produto" onChange={e=>setDescricao(e.target.value)} />
         </div>
 
         <div className="modal-footer">

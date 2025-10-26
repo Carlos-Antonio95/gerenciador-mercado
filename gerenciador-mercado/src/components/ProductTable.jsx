@@ -25,7 +25,7 @@ export default function ProductTable({ produtos, onEdit, onDelete, q, setQ, filt
 
       <div className="controls">
         <div className="search">
-          <input type="text" placeholder="Pesquisar por nome ou descrição..." value={q} onChange={e=>setQ(e.target.value)} />
+          <input type="text" placeholder="Pesquisar..." value={q} onChange={e=>setQ(e.target.value)} style={{width: '200px'}} />
         </div>
         <select value={filter} onChange={e=>setFilter(e.target.value)}>
           <option value="">Filtrar por categoria</option>

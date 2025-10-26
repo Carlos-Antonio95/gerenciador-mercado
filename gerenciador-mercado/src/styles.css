@@ -21,7 +21,7 @@ body { margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Arial; background:v
 
 .panel { background:var(--card); border-radius:12px; padding:16px; box-shadow:0 8px 30px rgba(2,6,23,0.06); }
 .controls { display:flex; gap:12px; align-items:center; margin-bottom:12px; }
-.search { flex:1; display:flex; align-items:center; background:#f3f5f9; padding:8px; border-radius:10px; }
+.search { flex:1; display:flex; align-items:center; background:#f3f5f9; padding:8px;width: 200px; border-radius:10px; }
 .search input { border:0; background:transparent; outline:0; padding:6px 8px; width:100%; }
 table { width:100%; border-collapse:collapse; }
 th,td { padding:10px 8px; text-align:left; border-bottom:1px solid #eef2f7; font-size:14px; }
@@ -34,7 +34,7 @@ th { color:var(--muted); font-weight:600; }
 .form-row { display:flex; gap:12px; margin-bottom:10px; }
 .form-row .col { flex:1; }
 label { display:block; font-size:13px; color:var(--muted); margin-bottom:6px; }
-input[type="text"], input[type="number"], textarea, select { width:100%; padding:10px; border-radius:8px; border:1px solid #e6eef7; background:#fbfdff;   color: #0f172a;}
+input[type="text"], input[type="number"], textarea, select { width:100%; padding:10px; border-radius:8px; border:1px solid #e6eef7; background:#fbfdff; color: #0f172a;}
 textarea { resize:vertical; min-height:80px; }
 .modal-footer { display:flex; justify-content:flex-end; gap:8px; margin-top:12px; }
 
@@ -43,4 +43,32 @@ textarea { resize:vertical; min-height:80px; }
   .layout { flex-direction:column; }
   .main { padding:14px; }
   .form-row { flex-direction:column; }
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; /* ou center se quiser centralizar verticalmente */
+  align-items: stretch;         /* faz os filhos ocuparem toda a largura */
+  padding: 0;                   /* opcional, remove espaço interno */
+  gap: 18px;
+  width: auto;
+}
+
+.panel {
+  background: var(--card);
+  border-radius: 0;     /* ou mantenha 12px se quiser cantos arredondados */
+  padding: 24px;
+  box-shadow: 0 8px 30px rgba(2,6,23,0.06);
+  width: 200%;          /* ocupa toda a largura do main */
+  flex: 1;  
+              /* faz o panel ocupar toda a altura disponível */
+}
+.topbar {
+  display: inline-flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 120px;
+  width: 200%;          /* ocupa toda a largura do main */
 }
