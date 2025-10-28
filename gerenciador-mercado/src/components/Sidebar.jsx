@@ -1,21 +1,21 @@
-export default function Sidebar() {
+export default function Sidebar({ onNavigate = () => {} }) {
+  const handle = (e, dest) => { e.preventDefault(); onNavigate(dest); };
+
   return (
     <aside className="sidebar" aria-label="Menu">
       <div className="brand">
         <div className="logo">MS</div>
         <div>
-          <div style={{fontWeight:700}}>Mercado Simples</div>
-          <div className="small">Painel administrativo</div>
+          <div style={{ fontWeight: 700 }}>Mercado Simples</div>
+          <div className="small">Painel Administrativo</div>
         </div>
       </div>
       <nav className="nav" aria-label="Navegação principal">
-        <a href="#" className="active">Tela Inicial</a>
-        <a href="#">Produtos</a>
-        <a href="#">Pedidos</a>
-        <a href="#">Clientes</a>
-        <a href="#">Configurações</a>
+        <a href="#" onClick={e => handle(e, 'home')}>Tela Inicial</a>
+        <a href="#" onClick={e => handle(e, 'sell')}>Produtos</a>
+        <a href="#" onClick={e => handle(e, 'report')}>Relatório</a>
+        <a href="#" onClick={e => handle(e, 'settings')}>Configurações</a>
       </nav>
-      <div style={{marginTop:'auto', fontSize:'13px', opacity:.95}}>Usuário: admin@lojacaiana</div>
     </aside>
   )
 }
