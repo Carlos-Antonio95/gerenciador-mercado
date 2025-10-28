@@ -1,4 +1,4 @@
-export default function ProductTable({ produtos, onEdit, onDelete, q, setQ, filter, setFilter }) {
+export default function ProductTable({ produtos, onEdit, onDelete, onOpenSell, q, setQ, filter, setFilter }) {
 
   const filtered = produtos.filter(p => {
     const matchQ = !q || p.nome.toLowerCase().includes(q.toLowerCase()) || (p.descricao||'').toLowerCase().includes(q.toLowerCase());
@@ -50,8 +50,12 @@ export default function ProductTable({ produtos, onEdit, onDelete, q, setQ, filt
                 <td className="price">R$ {Number(p.preco).toFixed(2)}</td>
                 <td>{escapeHtml(p.descricao||'')}</td>
                 <td className="actions-cell">
-                  <button className="btn ghost" style={{padding:'6px 8px'}} onClick={()=>onEdit(p)}>Editar</button>
-                  <button className="btn" style={{padding:'6px 8px', background:'#ef4444'}} onClick={()=>onDelete(p.id)}>Excluir</button>
+                  <button className="btn ghost" style={{ padding: '6px 8px' }} onClick={() => onEdit(p)}>Editar</button>
+                  <button className="btn ghost" style={{ padding: '6px 8px', background: '#10b981', color: '#fff' }} onClick={() => {
+                    if(!onOpenSell) return alert('Ação de venda não implementada');
+                    onOpenSell(p);
+                  }}>{p.estoque > 0 ? 'Vender' : 'Sem estoque'}</button>
+                  <button className="btn" style={{ padding: '6px 8px', background: '#ef4444' }} onClick={() => onDelete(p.id)}>Excluir</button>
                 </td>
               </tr>
             ))}
