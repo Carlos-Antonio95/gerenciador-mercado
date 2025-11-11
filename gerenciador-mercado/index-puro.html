@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciador de Mercado - HTML Puro</title>
+    <link rel="stylesheet" href="styles-puro.css">
+</head>
+<body>
+    <div class="layout">
+        <!-- Sidebar -->
+        <aside class="sidebar" aria-label="Menu">
+            <div class="brand">
+                <div class="logo">MS</div>
+                <div>
+                    <div style="font-weight: 700;">Mercado Simples</div>
+                    <div class="small">Painel Administrativo</div>
+                </div>
+            </div>
+            <nav class="nav" aria-label="Navegação principal">
+                <a href="#" class="nav-link active" data-view="home">Tela Inicial</a>
+                <a href="#" class="nav-link" data-view="sell">Produtos</a>
+                <a href="#" class="nav-link" data-view="report">Relatório</a>
+                <a href="#" class="nav-link" data-view="settings">Configurações</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Topbar -->
+            <div class="topbar">
+                <div class="breadcrumbs" id="breadcrumbs">Tela Inicial</div>
+                <div class="actions">
+                    <button id="btn-back" class="btn" style="display: none;">← Voltar</button>
+                    <button id="btn-new-product" class="btn" style="display: none;">+ Novo Produto</button>
+                </div>
+            </div>
+
+            <!-- Content Container -->
+            <div id="content-container" class="panel">
+                <!-- Home View -->
+                <section id="view-home" class="view-content">
+                    <h2>Bem-vindo ao Gerenciador</h2>
+                    <p style="color: var(--muted);">Escolha uma ação abaixo para começar:</p>
+                    <div class="home-cards">
+                        <div class="home-card card-hover">
+                            <h3>Vender produtos</h3>
+                            <p style="color: var(--muted);">Acesse a lista de produtos para registrar vendas e gerenciar estoque.</p>
+                            <div style="margin-top: 12px;">
+                                <button class="btn" onclick="switchView('sell')">Ir para vendas</button>
+                            </div>
+                        </div>
+                        <div class="home-card card-hover">
+                            <h3>Cadastrar novo produto</h3>
+                            <p style="color: var(--muted);">Abra o formulário para adicionar um produto ao catálogo.</p>
+                            <div style="margin-top: 12px;">
+                                <button class="btn" onclick="openProductModal()">Cadastrar</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Sell View -->
+                <section id="view-sell" class="view-content" style="display: none;">
+                    <header class="view-header">
+                        <div>
+                            <h2>Lista de produtos</h2>
+                            <p style="color: var(--muted); margin: 0;">Itens: <span id="product-count">0</span></p>
+                        </div>
+                    </header>
+                    <div class="controls">
+                        <div class="search">
+                            <input type="text" id="search-input" placeholder="Pesquisar..." style="width: 200px;">
+                        </div>
+                        <select id="filter-category">
+                            <option value="">Filtrar por categoria</option>
+                            <option value="Sabonetes">Sabonetes</option>
+                            <option value="Óleos">Óleos</option>
+                            <option value="Kits">Kits</option>
+                            <option value="Presentes">Presentes</option>
+                        </select>
+                        <button class="btn ghost" onclick="exportJSON()">Exportar JSON</button>
+                    </div>
+                    <div class="products-grid" id="products-container">
+                        <!-- Produtos renderizados via JavaScript -->
+                    </div>
+                </section>
+
+                <!-- Report View -->
+                <section id="view-report" class="view-content" style="display: none;">
+                    <h2>Relatório</h2>
+                    <p style="color: var(--muted);">Exportar registros de vendas e produtos adicionados.</p>
+                    <div class="report-cards">
+                        <div class="report-card card-hover">
+                            <h3>Produtos Vendidos</h3>
+                            <p style="color: var(--muted);">Registros: <span id="sales-count">0</span></p>
+                            <div style="margin-top: 12px;">
+                                <button class="btn" onclick="exportSalesCSV()">Exportar CSV (vendas)</button>
+                                <button class="btn ghost" onclick="clearSales()" style="margin-left: 8px;">Limpar</button>
+                            </div>
+                        </div>
+                        <div class="report-card card-hover">
+                            <h3>Produtos Cadastrados</h3>
+                            <p style="color: var(--muted);">Registros: <span id="new-products-count">0</span></p>
+                            <div style="margin-top: 12px;">
+                                <button class="btn" onclick="exportNewProductsCSV()">Exportar CSV (produtos novos)</button>
+                                <button class="btn ghost" onclick="clearNewProducts()" style="margin-left: 8px;">Limpar</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Settings View -->
+                <section id="view-settings" class="view-content" style="display: none;">
+                    <h2>Configurações</h2>
+                    <p style="color: var(--muted);">Personalize as cores do sistema.</p>
+                    <div class="settings-grid">
+                        <div class="settings-controls">
+                            <div class="form-row">
+                                <div class="col">
+                                    <label>Cor de fundo da página</label>
+                                    <div class="color-row">
+                                        <input class="color-input" id="color-page-bg" type="color" value="#f4f6fb">
+                                        <div class="swatch" id="swatch-page-bg" style="background: #f4f6fb;"></div>
+                                        <div class="swatch-label" id="label-page-bg">#f4f6fb</div>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <label>Cor inicial do Menu Lateral</label>
+                                    <div class="color-row">
+                                        <input class="color-input" id="color-sidebar-start" type="color" value="#118ca1">
+                                        <div class="swatch" id="swatch-sidebar-start" style="background: #118ca1;"></div>
+                                        <div class="swatch-label" id="label-sidebar-start">#118ca1</div>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <label>Cor final do Menu Lateral</label>
+                                    <div class="color-row">
+                                        <input class="color-input" id="color-sidebar-end" type="color" value="#212c1d">
+                                        <div class="swatch" id="swatch-sidebar-end" style="background: #212c1d;"></div>
+                                        <div class="swatch-label" id="label-sidebar-end">#212c1d</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button class="btn ghost" onclick="resetTheme()">Restaurar padrão</button>
+                                <button class="btn" onclick="saveTheme()">Salvar</button>
+                            </div>
+                        </div>
+                        <aside class="settings-preview">
+                            <div class="preview-sidebar" id="preview-sidebar" style="background: linear-gradient(180deg, #118ca1, #212c1d);">
+                                <div class="preview-logo">MS</div>
+                                <nav class="preview-nav">
+                                    <div class="preview-item active">Tela Inicial</div>
+                                    <div class="preview-item">Produtos</div>
+                                    <div class="preview-item">Relatório</div>
+                                </nav>
+                            </div>
+                            <div class="preview-content" id="preview-content" style="background: #f4f6fb;">
+                                <div style="padding: 18px;">
+                                    <h3 style="margin: 0;">Pré-visualização</h3>
+                                    <p style="color: var(--muted);">Veja como suas escolhas afetam a interface.</p>
+                                </div>
+                            </div>
+                        </aside>
+                    </div>
+                </section>
+
+                <footer>
+                    Dados salvos localmente no navegador (localStorage).
+                </footer>
+            </div>
+        </main>
+    </div>
+
+    <!-- Product Modal -->
+    <div id="product-modal" class="modal-backdrop hidden">
+        <div class="modal" role="dialog" aria-modal="true" aria-label="Formulário produto">
+            <h3 id="modal-title">Novo produto</h3>
+            <div class="form-row">
+                <div class="col">
+                    <label>Nome</label>
+                    <input type="text" id="modal-nome" placeholder="Nome do produto">
+                </div>
+                <div class="col">
+                    <label>Categoria</label>
+                    <select id="modal-categoria">
+                        <option>Sabonetes</option>
+                        <option>Óleos</option>
+                        <option>Kits</option>
+                        <option>Presentes</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="col">
+                    <label>Preço (R$)</label>
+                    <input type="number" id="modal-preco" placeholder="ex: 12.99" min="0" step="0.01">
+                </div>
+                <div class="col">
+                    <label>Estoque</label>
+                    <input type="number" id="modal-estoque" placeholder="Quantidade em estoque" min="0" step="1">
+                </div>
+            </div>
+            <div>
+                <label>Descrição</label>
+                <textarea id="modal-descricao" placeholder="Descrição do produto"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button class="btn ghost" onclick="closeProductModal()">Cancelar</button>
+                <button class="btn" onclick="saveProduct()">Salvar produto</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sell Modal -->
+    <div id="sell-modal" class="modal-backdrop hidden">
+        <div class="modal" role="dialog" aria-modal="true" aria-label="Registrar venda">
+            <h3>Registrar venda - <span id="sell-product-name"></span></h3>
+            <div class="form-row">
+                <div class="col">
+                    <label>Quantidade</label>
+                    <input type="number" id="sell-quantidade" placeholder="Quantidade a vender" min="1" step="1">
+                </div>
+            </div>
+            <p style="color: var(--muted); font-size: 13px;">
+                Disponível em estoque: <strong id="sell-estoque">0</strong>
+            </p>
+            <div class="modal-footer">
+                <button class="btn ghost" onclick="closeSellModal()">Cancelar</button>
+                <button class="btn" onclick="confirmSell()">Registrar venda</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script-puro.js"></script>
+</body>
+</html>
