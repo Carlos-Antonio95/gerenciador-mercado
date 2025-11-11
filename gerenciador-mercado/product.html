@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Produtos - Gerenciador de Mercado</title>
+    <link rel="stylesheet" href="styles-puro.css">
+</head>
+<body>
+    <div class="layout">
+        <!-- Sidebar -->
+        <aside class="sidebar" aria-label="Menu">
+            <div class="brand">
+                <div class="logo">MS</div>
+                <div>
+                    <div style="font-weight: 700;">Mercado Simples</div>
+                    <div class="small">Painel Administrativo</div>
+                </div>
+            </div>
+            <nav class="nav" aria-label="Navegação principal">
+                <a href="index-puro.html" class="nav-link">Tela Inicial</a>
+                <a href="product.html" class="nav-link active">Produtos</a>
+                <a href="report.html" class="nav-link">Relatório</a>
+                <a href="settings.html" class="nav-link">Configurações</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Topbar -->
+            <div class="topbar">
+                <div class="breadcrumbs">Produtos</div>
+                <div class="actions">
+                    <button id="btn-back" class="btn" style="display: none;">← Voltar</button>
+                    <button id="btn-new-product" class="btn">+ Novo Produto</button>
+                </div>
+            </div>
+
+            <!-- Content Container -->
+            <div class="panel">
+                <header class="view-header">
+                    <div>
+                        <h2>Lista de produtos</h2>
+                        <p style="color: var(--muted); margin: 0;">Itens: <span id="product-count">0</span></p>
+                    </div>
+                </header>
+                <div class="controls">
+                    <div class="search">
+                        <input type="text" id="search-input" placeholder="Pesquisar..." style="width: 200px;">
+                    </div>
+                    <select id="filter-category">
+                        <option value="">Filtrar por categoria</option>
+                        <option value="Sabonetes">Sabonetes</option>
+                        <option value="Óleos">Óleos</option>
+                        <option value="Kits">Kits</option>
+                        <option value="Presentes">Presentes</option>
+                    </select>
+                    <button class="btn ghost" onclick="exportJSON()">Exportar JSON</button>
+                </div>
+                <div class="products-grid" id="products-container">
+                    <!-- Produtos renderizados via JavaScript -->
+                </div>
+
+                <footer>
+                    Dados salvos localmente no navegador (localStorage).
+                </footer>
+            </div>
+        </main>
+    </div>
+
+    <!-- Product Modal -->
+    <div id="product-modal" class="modal-backdrop hidden">
+        <div class="modal" role="dialog" aria-modal="true" aria-label="Formulário produto">
+            <h3 id="modal-title">Novo produto</h3>
+            <div class="form-row">
+                <div class="col">
+                    <label>Nome</label>
+                    <input type="text" id="modal-nome" placeholder="Nome do produto">
+                </div>
+                <div class="col">
+                    <label>Categoria</label>
+                    <select id="modal-categoria">
+                        <option>Sabonetes</option>
+                        <option>Óleos</option>
+                        <option>Kits</option>
+                        <option>Presentes</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="col">
+                    <label>Preço (R$)</label>
+                    <input type="number" id="modal-preco" placeholder="ex: 12.99" min="0" step="0.01">
+                </div>
+                <div class="col">
+                    <label>Estoque</label>
+                    <input type="number" id="modal-estoque" placeholder="Quantidade em estoque" min="0" step="1">
+                </div>
+            </div>
+            <div>
+                <label>Descrição</label>
+                <textarea id="modal-descricao" placeholder="Descrição do produto"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button class="btn ghost" onclick="closeProductModal()">Cancelar</button>
+                <button class="btn" onclick="saveProduct()">Salvar produto</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sell Modal -->
+    <div id="sell-modal" class="modal-backdrop hidden">
+        <div class="modal" role="dialog" aria-modal="true" aria-label="Registrar venda">
+            <h3>Registrar venda - <span id="sell-product-name"></span></h3>
+            <div class="form-row">
+                <div class="col">
+                    <label>Quantidade</label>
+                    <input type="number" id="sell-quantidade" placeholder="Quantidade a vender" min="1" step="1">
+                </div>
+            </div>
+            <p style="color: var(--muted); font-size: 13px;">
+                Disponível em estoque: <strong id="sell-estoque">0</strong>
+            </p>
+            <div class="modal-footer">
+                <button class="btn ghost" onclick="closeSellModal()">Cancelar</button>
+                <button class="btn" onclick="confirmSell()">Registrar venda</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script-puro.js"></script>
+</body>
+</html>

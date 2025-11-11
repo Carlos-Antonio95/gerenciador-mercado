@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurações - Gerenciador de Mercado</title>
+    <link rel="stylesheet" href="styles-puro.css">
+</head>
+<body>
+    <div class="layout">
+        <!-- Sidebar -->
+        <aside class="sidebar" aria-label="Menu">
+            <div class="brand">
+                <div class="logo">MS</div>
+                <div>
+                    <div style="font-weight: 700;">Mercado Simples</div>
+                    <div class="small">Painel Administrativo</div>
+                </div>
+            </div>
+            <nav class="nav" aria-label="Navegação principal">
+                <a href="index-puro.html" class="nav-link">Tela Inicial</a>
+                <a href="product.html" class="nav-link">Produtos</a>
+                <a href="report.html" class="nav-link">Relatório</a>
+                <a href="settings.html" class="nav-link active">Configurações</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Topbar -->
+            <div class="topbar">
+                <div class="breadcrumbs">Configurações</div>
+                <div class="actions"></div>
+            </div>
+
+            <!-- Content Container -->
+            <div class="panel">
+                <h2>Configurações</h2>
+                <p style="color: var(--muted);">Personalize as cores do sistema.</p>
+                <div class="settings-grid">
+                    <div class="settings-controls">
+                        <div class="form-row">
+                            <div class="col">
+                                <label>Cor de fundo da página</label>
+                                <div class="color-row">
+                                    <input class="color-input" id="color-page-bg" type="color" value="#f4f6fb">
+                                    <div class="swatch" id="swatch-page-bg" style="background: #f4f6fb;"></div>
+                                    <div class="swatch-label" id="label-page-bg">#f4f6fb</div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <label>Cor inicial do Menu Lateral</label>
+                                <div class="color-row">
+                                    <input class="color-input" id="color-sidebar-start" type="color" value="#118ca1">
+                                    <div class="swatch" id="swatch-sidebar-start" style="background: #118ca1;"></div>
+                                    <div class="swatch-label" id="label-sidebar-start">#118ca1</div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <label>Cor final do Menu Lateral</label>
+                                <div class="color-row">
+                                    <input class="color-input" id="color-sidebar-end" type="color" value="#212c1d">
+                                    <div class="swatch" id="swatch-sidebar-end" style="background: #212c1d;"></div>
+                                    <div class="swatch-label" id="label-sidebar-end">#212c1d</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn ghost" onclick="resetTheme()">Restaurar padrão</button>
+                            <button class="btn" onclick="saveTheme()">Salvar</button>
+                        </div>
+                    </div>
+                    <aside class="settings-preview">
+                        <div class="preview-sidebar" id="preview-sidebar" style="background: linear-gradient(180deg, #118ca1, #212c1d);">
+                            <div class="preview-logo">MS</div>
+                            <nav class="preview-nav">
+                                <div class="preview-item active">Tela Inicial</div>
+                                <div class="preview-item">Produtos</div>
+                                <div class="preview-item">Relatório</div>
+                            </nav>
+                        </div>
+                        <div class="preview-content" id="preview-content" style="background: #f4f6fb;">
+                            <div style="padding: 18px;">
+                                <h3 style="margin: 0;">Pré-visualização</h3>
+                                <p style="color: var(--muted);">Veja como suas escolhas afetam a interface.</p>
+                            </div>
+                        </div>
+                    </aside>
+                </div>
+
+                <footer>
+                    Dados salvos localmente no navegador (localStorage).
+                </footer>
+            </div>
+        </main>
+    </div>
+
+    <script src="script-puro.js"></script>
+</body>
+</html>
