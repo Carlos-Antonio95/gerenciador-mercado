@@ -28,7 +28,17 @@ document.addEventListener('DOMContentLoaded', () => {
     loadData();
     setupEventListeners();
     applyTheme();
-    switchView('home');
+
+    // Inicialização por página: se o elemento existir, roda a função relacionada
+    if (document.getElementById('products-container')) {
+        renderProducts();
+    }
+    if (document.getElementById('sales-count')) {
+        updateReportCounts();
+    }
+    if (document.getElementById('color-page-bg')) {
+        loadSettings();
+    }
 });
 
 // Load data from localStorage
@@ -52,59 +62,66 @@ function loadData() {
 
 // Setup event listeners
 function setupEventListeners() {
-    // Navigation
+    // Navigation links: only attach SPA behavior if data-view exists (backwards compatible)
     document.querySelectorAll('.nav-link').forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            switchView(link.dataset.view);
+        if (link.dataset && link.dataset.view) {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                switchView(link.dataset.view);
+            });
+        }
+    });
+
+    // Topbar buttons (só se existirem)
+    const btnBack = document.getElementById('btn-back');
+    if (btnBack) btnBack.addEventListener('click', () => switchView('home'));
+    const btnNew = document.getElementById('btn-new-product');
+    if (btnNew) btnNew.addEventListener('click', openProductModal);
+
+    // Search and filter (produtos)
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            state.searchQuery = e.target.value;
+            renderProducts();
         });
-    });
+    }
+    const filterCategory = document.getElementById('filter-category');
+    if (filterCategory) {
+        filterCategory.addEventListener('change', (e) => {
+            state.filterCategory = e.target.value;
+            renderProducts();
+        });
+    }
 
-    // Topbar buttons
-    document.getElementById('btn-back').addEventListener('click', () => switchView('home'));
-    document.getElementById('btn-new-product').addEventListener('click', openProductModal);
+    // Settings color inputs (só se existirem)
+    const colorPageBg = document.getElementById('color-page-bg');
+    if (colorPageBg) colorPageBg.addEventListener('change', (e) => updatePreview('page-bg', e.target.value));
+    const colorSidebarStart = document.getElementById('color-sidebar-start');
+    if (colorSidebarStart) colorSidebarStart.addEventListener('change', (e) => updatePreview('sidebar-start', e.target.value));
+    const colorSidebarEnd = document.getElementById('color-sidebar-end');
+    if (colorSidebarEnd) colorSidebarEnd.addEventListener('change', (e) => updatePreview('sidebar-end', e.target.value));
 
-    // Search and filter
-    document.getElementById('search-input').addEventListener('input', (e) => {
-        state.searchQuery = e.target.value;
-        renderProducts();
-    });
-
-    document.getElementById('filter-category').addEventListener('change', (e) => {
-        state.filterCategory = e.target.value;
-        renderProducts();
-    });
-
-    // Settings color inputs
-    document.getElementById('color-page-bg').addEventListener('change', (e) => {
-        updatePreview('page-bg', e.target.value);
-    });
-    document.getElementById('color-sidebar-start').addEventListener('change', (e) => {
-        updatePreview('sidebar-start', e.target.value);
-    });
-    document.getElementById('color-sidebar-end').addEventListener('change', (e) => {
-        updatePreview('sidebar-end', e.target.value);
-    });
-
-    // Modal backdrop clicks
-    document.getElementById('product-modal').addEventListener('click', (e) => {
-        if (e.target === e.currentTarget) closeProductModal();
-    });
-    document.getElementById('sell-modal').addEventListener('click', (e) => {
-        if (e.target === e.currentTarget) closeSellModal();
-    });
+    // Modal backdrop clicks (só se existirem)
+    const productModal = document.getElementById('product-modal');
+    if (productModal) productModal.addEventListener('click', (e) => { if (e.target === e.currentTarget) closeProductModal(); });
+    const sellModal = document.getElementById('sell-modal');
+    if (sellModal) sellModal.addEventListener('click', (e) => { if (e.target === e.currentTarget) closeSellModal(); });
 }
 
 // Switch view
 function switchView(view) {
     state.currentView = view;
-
-    // Update nav active state
+    // Update nav active state (safe)
     document.querySelectorAll('.nav-link').forEach(link => {
-        link.classList.toggle('active', link.dataset.view === view);
+        try {
+            link.classList.toggle('active', link.dataset && link.dataset.view === view);
+        } catch (e) {
+            // ignore
+        }
     });
 
-    // Update content visibility
+    // Update content visibility (if SPA is still used)
     document.querySelectorAll('.view-content').forEach(el => {
         el.style.display = el.id === `view-${view}` ? 'flex' : 'none';
     });
@@ -116,21 +133,22 @@ function switchView(view) {
         report: 'Relatório',
         settings: 'Configurações'
     };
-    document.getElementById('breadcrumbs').textContent = breadcrumbText[view] || 'Tela Inicial';
+    const breadcrumbsEl = document.getElementById('breadcrumbs');
+    if (breadcrumbsEl) breadcrumbsEl.textContent = breadcrumbText[view] || 'Tela Inicial';
 
-    // Update topbar buttons
+    // Update topbar buttons safely
     const btnBack = document.getElementById('btn-back');
     const btnNew = document.getElementById('btn-new-product');
-    btnBack.style.display = view !== 'home' ? 'block' : 'none';
-    btnNew.style.display = view === 'sell' ? 'block' : 'none';
+    if (btnBack) btnBack.style.display = view !== 'home' ? 'block' : 'none';
+    if (btnNew) btnNew.style.display = view === 'sell' ? 'block' : 'none';
 
     // Update content
     if (view === 'sell') {
-        renderProducts();
+        if (document.getElementById('products-container')) renderProducts();
     } else if (view === 'report') {
-        updateReportCounts();
+        if (document.getElementById('sales-count')) updateReportCounts();
     } else if (view === 'settings') {
-        loadSettings();
+        if (document.getElementById('color-page-bg')) loadSettings();
     }
 }
 
@@ -145,6 +163,7 @@ function renderProducts() {
     });
 
     const container = document.getElementById('products-container');
+    if (!container) return;
     container.innerHTML = filtered.map(p => `
         <article class="product-card">
             <div class="product-card-header">
@@ -179,7 +198,8 @@ function renderProducts() {
         </article>
     `).join('');
 
-    document.getElementById('product-count').textContent = state.produtos.length;
+    const productCountEl = document.getElementById('product-count');
+    if (productCountEl) productCountEl.textContent = state.produtos.length;
 }
 
 // Product operations
@@ -237,14 +257,14 @@ function saveProduct() {
 
     localStorage.setItem(LS_KEY, JSON.stringify(state.produtos));
     closeProductModal();
-    if (state.currentView === 'sell') renderProducts();
+    if (document.getElementById('products-container')) renderProducts();
 }
 
 function deleteProduct(id) {
     if (!confirm('Excluir esse produto?')) return;
     state.produtos = state.produtos.filter(p => p.id !== id);
     localStorage.setItem(LS_KEY, JSON.stringify(state.produtos));
-    renderProducts();
+    if (document.getElementById('products-container')) renderProducts();
 }
 
 // Sell operations
@@ -252,18 +272,19 @@ function openSellModal(productId) {
     const product = state.produtos.find(p => p.id === productId);
     if (!product) return;
     state.sellingProduct = product;
-    document.getElementById('sell-product-name').textContent = product.nome;
-    document.getElementById('sell-estoque').textContent = product.estoque;
-    document.getElementById('sell-quantidade').value = '';
-    document.getElementById('sell-modal').classList.remove('hidden');
+    const sellName = document.getElementById('sell-product-name'); if (sellName) sellName.textContent = product.nome;
+    const sellEst = document.getElementById('sell-estoque'); if (sellEst) sellEst.textContent = product.estoque;
+    const sellQty = document.getElementById('sell-quantidade'); if (sellQty) sellQty.value = '';
+    const sellModal = document.getElementById('sell-modal'); if (sellModal) sellModal.classList.remove('hidden');
 }
 
 function closeSellModal() {
-    document.getElementById('sell-modal').classList.add('hidden');
+    const sellModal = document.getElementById('sell-modal'); if (sellModal) sellModal.classList.add('hidden');
 }
 
 function confirmSell() {
-    const quantidade = parseInt(document.getElementById('sell-quantidade').value) || 0;
+    const sellQtyEl = document.getElementById('sell-quantidade');
+    const quantidade = sellQtyEl ? (parseInt(sellQtyEl.value) || 0) : 0;
     if (quantidade <= 0) {
         alert('Quantidade deve ser maior que 0');
         return;
@@ -291,14 +312,14 @@ function confirmSell() {
 
     alert(`Venda registrada: ${quantidade} x ${product.nome}`);
     closeSellModal();
-    renderProducts();
-    if (state.currentView === 'report') updateReportCounts();
+    if (document.getElementById('products-container')) renderProducts();
+    if (document.getElementById('sales-count')) updateReportCounts();
 }
 
 // Report operations
 function updateReportCounts() {
-    document.getElementById('sales-count').textContent = state.vendas.length;
-    document.getElementById('new-products-count').textContent = state.novos.length;
+    const salesEl = document.getElementById('sales-count'); if (salesEl) salesEl.textContent = state.vendas.length;
+    const novosEl = document.getElementById('new-products-count'); if (novosEl) novosEl.textContent = state.novos.length;
 }
 
 function exportSalesCSV() {
@@ -357,42 +378,45 @@ function exportJSON() {
 function loadSettings() {
     const theme = JSON.parse(localStorage.getItem(THEME_KEY) || 'null');
     if (theme) {
-        document.getElementById('color-page-bg').value = theme.pageBg || '#f4f6fb';
-        document.getElementById('color-sidebar-start').value = theme.sidebarStart || '#118ca1';
-        document.getElementById('color-sidebar-end').value = theme.sidebarEnd || '#212c1d';
+        const pageBg = document.getElementById('color-page-bg'); if (pageBg) pageBg.value = theme.pageBg || '#f4f6fb';
+        const sideStart = document.getElementById('color-sidebar-start'); if (sideStart) sideStart.value = theme.sidebarStart || '#118ca1';
+        const sideEnd = document.getElementById('color-sidebar-end'); if (sideEnd) sideEnd.value = theme.sidebarEnd || '#212c1d';
     }
 }
 
 function updatePreview(type, value) {
     if (type === 'page-bg') {
-        document.getElementById('color-page-bg').value = value;
-        document.getElementById('swatch-page-bg').style.background = value;
-        document.getElementById('label-page-bg').textContent = value;
-        document.getElementById('preview-content').style.background = value;
+        const cp = document.getElementById('color-page-bg'); if (cp) cp.value = value;
+        const sw = document.getElementById('swatch-page-bg'); if (sw) sw.style.background = value;
+        const lb = document.getElementById('label-page-bg'); if (lb) lb.textContent = value;
+        const preview = document.getElementById('preview-content'); if (preview) preview.style.background = value;
     } else if (type === 'sidebar-start') {
-        document.getElementById('color-sidebar-start').value = value;
-        document.getElementById('swatch-sidebar-start').style.background = value;
-        document.getElementById('label-sidebar-start').textContent = value;
+        const cs = document.getElementById('color-sidebar-start'); if (cs) cs.value = value;
+        const sws = document.getElementById('swatch-sidebar-start'); if (sws) sws.style.background = value;
+        const lbs = document.getElementById('label-sidebar-start'); if (lbs) lbs.textContent = value;
         updateSidebarPreview();
     } else if (type === 'sidebar-end') {
-        document.getElementById('color-sidebar-end').value = value;
-        document.getElementById('swatch-sidebar-end').style.background = value;
-        document.getElementById('label-sidebar-end').textContent = value;
+        const ce = document.getElementById('color-sidebar-end'); if (ce) ce.value = value;
+        const swse = document.getElementById('swatch-sidebar-end'); if (swse) swse.style.background = value;
+        const lbse = document.getElementById('label-sidebar-end'); if (lbse) lbse.textContent = value;
         updateSidebarPreview();
     }
 }
 
 function updateSidebarPreview() {
-    const start = document.getElementById('color-sidebar-start').value;
-    const end = document.getElementById('color-sidebar-end').value;
-    document.getElementById('preview-sidebar').style.background = `linear-gradient(180deg, ${start}, ${end})`;
+    const startEl = document.getElementById('color-sidebar-start');
+    const endEl = document.getElementById('color-sidebar-end');
+    const preview = document.getElementById('preview-sidebar');
+    const start = startEl ? startEl.value : null;
+    const end = endEl ? endEl.value : null;
+    if (preview && start && end) preview.style.background = `linear-gradient(180deg, ${start}, ${end})`;
 }
 
 function saveTheme() {
     const theme = {
-        pageBg: document.getElementById('color-page-bg').value,
-        sidebarStart: document.getElementById('color-sidebar-start').value,
-        sidebarEnd: document.getElementById('color-sidebar-end').value
+        pageBg: (document.getElementById('color-page-bg') || {}).value,
+        sidebarStart: (document.getElementById('color-sidebar-start') || {}).value,
+        sidebarEnd: (document.getElementById('color-sidebar-end') || {}).value
     };
     localStorage.setItem(THEME_KEY, JSON.stringify(theme));
     applyTheme();
@@ -405,9 +429,9 @@ function resetTheme() {
         sidebarStart: '#118ca1',
         sidebarEnd: '#212c1d'
     };
-    document.getElementById('color-page-bg').value = defaults.pageBg;
-    document.getElementById('color-sidebar-start').value = defaults.sidebarStart;
-    document.getElementById('color-sidebar-end').value = defaults.sidebarEnd;
+    const pg = document.getElementById('color-page-bg'); if (pg) pg.value = defaults.pageBg;
+    const ss = document.getElementById('color-sidebar-start'); if (ss) ss.value = defaults.sidebarStart;
+    const se = document.getElementById('color-sidebar-end'); if (se) se.value = defaults.sidebarEnd;
     localStorage.removeItem(THEME_KEY);
     applyTheme();
 }

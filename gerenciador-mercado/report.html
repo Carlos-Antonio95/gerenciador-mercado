@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório - Gerenciador de Mercado</title>
+    <link rel="stylesheet" href="styles-puro.css">
+</head>
+<body>
+    <div class="layout">
+        <!-- Sidebar -->
+        <aside class="sidebar" aria-label="Menu">
+            <div class="brand">
+                <div class="logo">MS</div>
+                <div>
+                    <div style="font-weight: 700;">Mercado Simples</div>
+                    <div class="small">Painel Administrativo</div>
+                </div>
+            </div>
+            <nav class="nav" aria-label="Navegação principal">
+                <a href="index-puro.html" class="nav-link">Tela Inicial</a>
+                <a href="product.html" class="nav-link">Produtos</a>
+                <a href="report.html" class="nav-link active">Relatório</a>
+                <a href="settings.html" class="nav-link">Configurações</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Topbar -->
+            <div class="topbar">
+                <div class="breadcrumbs">Relatório</div>
+                <div class="actions">
+                    <button id="btn-back" class="btn" style="display: none;">← Voltar</button>
+                </div>
+            </div>
+
+            <!-- Content Container -->
+            <div class="panel">
+                <h2>Relatório</h2>
+                <p style="color: var(--muted);">Exportar registros de vendas e produtos adicionados.</p>
+                <div class="report-cards">
+                    <div class="report-card card-hover">
+                        <h3>Produtos Vendidos</h3>
+                        <p style="color: var(--muted);">Registros: <span id="sales-count">0</span></p>
+                        <div style="margin-top: 12px;">
+                            <button class="btn" onclick="exportSalesCSV()">Exportar CSV (vendas)</button>
+                            <button class="btn ghost" onclick="clearSales()" style="margin-left: 8px;">Limpar</button>
+                        </div>
+                    </div>
+                    <div class="report-card card-hover">
+                        <h3>Produtos Cadastrados</h3>
+                        <p style="color: var(--muted);">Registros: <span id="new-products-count">0</span></p>
+                        <div style="margin-top: 12px;">
+                            <button class="btn" onclick="exportNewProductsCSV()">Exportar CSV (produtos novos)</button>
+                            <button class="btn ghost" onclick="clearNewProducts()" style="margin-left: 8px;">Limpar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <footer>
+                    Dados salvos localmente no navegador (localStorage).
+                </footer>
+            </div>
+        </main>
+    </div>
+
+    <script src="script-puro.js"></script>
+</body>
+</html>
