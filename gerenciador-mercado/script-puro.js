@@ -232,39 +232,71 @@ function editProduct(id) {
 }
 
 function saveProduct() {
-    const nome = document.getElementById('modal-nome').value.trim();
-    const categoria = document.getElementById('modal-categoria').value;
-    const preco = parseFloat(document.getElementById('modal-preco').value) || 0;
-    const estoque = parseInt(document.getElementById('modal-estoque').value) || 0;
-    const descricao = document.getElementById('modal-descricao').value;
+  const nome = document.getElementById('modal-nome').value.trim();
+  const categoria = document.getElementById('modal-categoria').value;
+  const preco = parseFloat(document.getElementById('modal-preco').value) || 0;
+  const estoque = parseInt(document.getElementById('modal-estoque').value) || 0;
+  const descricao = document.getElementById('modal-descricao').value;
 
-    if (!nome) {
-        alert('Nome é obrigatório');
-        return;
-    }
+  if (!nome) {
+    Swal.fire({
+      title: 'Atenção!',
+      text: 'O nome do produto é obrigatório.',
+      icon: 'warning',
+      confirmButtonText: 'Entendi'
+    });
+    return;
+  }
 
-    const product = { nome, categoria, preco, estoque, descricao };
+  const product = { nome, categoria, preco, estoque, descricao };
 
-    if (state.editingProduct) {
-        product.id = state.editingProduct.id;
-        state.produtos = state.produtos.map(p => p.id === product.id ? product : p);
-    } else {
-        product.id = state.produtos.length ? Math.max(...state.produtos.map(p => p.id)) + 1 : 1;
-        state.produtos.push(product);
-        state.novos.push({ ...product, createdAt: new Date().toISOString() });
-        localStorage.setItem(LS_NOVOS, JSON.stringify(state.novos));
-    }
+  if (state.editingProduct) {
+    product.id = state.editingProduct.id;
+    state.produtos = state.produtos.map(p => p.id === product.id ? product : p);
+  } else {
+    product.id = state.produtos.length ? Math.max(...state.produtos.map(p => p.id)) + 1 : 1;
+    state.produtos.push(product);
+    state.novos.push({ ...product, createdAt: new Date().toISOString() });
+    localStorage.setItem(LS_NOVOS, JSON.stringify(state.novos));
+  }
 
-    localStorage.setItem(LS_KEY, JSON.stringify(state.produtos));
-    closeProductModal();
-    if (document.getElementById('products-container')) renderProducts();
+  localStorage.setItem(LS_KEY, JSON.stringify(state.produtos));
+  closeProductModal();
+  if (document.getElementById('products-container')) renderProducts();
+
+  Swal.fire({
+    title: 'Sucesso!',
+    text: state.editingProduct ? 'Produto atualizado com sucesso.' : 'Novo produto salvo com sucesso.',
+    icon: 'success',
+    confirmButtonText: 'Ok'
+  });
 }
 
+
 function deleteProduct(id) {
-    if (!confirm('Excluir esse produto?')) return;
+   Swal.fire({
+  title: 'Tem certeza?',
+  text: 'Essa ação não pode ser desfeita!',
+  icon: 'warning',
+  showCancelButton: true,
+  confirmButtonColor: '#3085d6',
+  cancelButtonColor: '#d33',
+  confirmButtonText: 'Sim, excluir',
+  cancelButtonText: 'Cancelar'
+}).then((result) => {
+  if (result.isConfirmed) {
     state.produtos = state.produtos.filter(p => p.id !== id);
     localStorage.setItem(LS_KEY, JSON.stringify(state.produtos));
     if (document.getElementById('products-container')) renderProducts();
+
+    Swal.fire({
+      title: 'Excluído!',
+      text: 'O produto foi removido com sucesso.',
+      icon: 'success'
+    });
+  }
+});
+
 }
 
 // Sell operations
@@ -281,40 +313,77 @@ function openSellModal(productId) {
 function closeSellModal() {
     const sellModal = document.getElementById('sell-modal'); if (sellModal) sellModal.classList.add('hidden');
 }
-
 function confirmSell() {
     const sellQtyEl = document.getElementById('sell-quantidade');
     const quantidade = sellQtyEl ? (parseInt(sellQtyEl.value) || 0) : 0;
+
+    // Validação da quantidade
     if (quantidade <= 0) {
-        alert('Quantidade deve ser maior que 0');
+        Swal.fire({
+            title: 'Quantidade inválida',
+            text: 'A quantidade deve ser maior que 0.',
+            icon: 'warning',
+            confirmButtonText: 'Entendi'
+        });
         return;
     }
+
+    // Validação de estoque
     if (state.sellingProduct.estoque < quantidade) {
-        alert('Estoque insuficiente');
+        Swal.fire({
+            title: 'Estoque insuficiente',
+            text: `Há apenas ${state.sellingProduct.estoque} unidades disponíveis.`,
+            icon: 'error',
+            confirmButtonText: 'Ok'
+        });
         return;
     }
 
+    // Confirmação da venda
     const product = state.sellingProduct;
-    product.estoque -= quantidade;
-    state.produtos = state.produtos.map(p => p.id === product.id ? product : p);
-    localStorage.setItem(LS_KEY, JSON.stringify(state.produtos));
+    const total = (product.preco * quantidade).toFixed(2);
 
-    const venda = {
-        productId: product.id,
-        nome: product.nome,
-        quantidade,
-        preco: product.preco,
-        total: Number((product.preco * quantidade).toFixed(2)),
-        date: new Date().toISOString()
-    };
-    state.vendas.push(venda);
-    localStorage.setItem(LS_VENDAS, JSON.stringify(state.vendas));
+    Swal.fire({
+        title: 'Confirmar venda?',
+        html: `<b>${quantidade}</b> x ${product.nome}<br>Total: <b>R$ ${total}</b>`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Confirmar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Atualiza o estoque
+            product.estoque -= quantidade;
+            state.produtos = state.produtos.map(p => p.id === product.id ? product : p);
+            localStorage.setItem(LS_KEY, JSON.stringify(state.produtos));
 
-    alert(`Venda registrada: ${quantidade} x ${product.nome}`);
-    closeSellModal();
-    if (document.getElementById('products-container')) renderProducts();
-    if (document.getElementById('sales-count')) updateReportCounts();
+            // Registra a venda
+            const venda = {
+                productId: product.id,
+                nome: product.nome,
+                quantidade,
+                preco: product.preco,
+                total: Number(total),
+                date: new Date().toISOString()
+            };
+            state.vendas.push(venda);
+            localStorage.setItem(LS_VENDAS, JSON.stringify(state.vendas));
+
+            // Mensagem de sucesso
+            Swal.fire({
+                title: 'Venda registrada!',
+                html: `<b>${quantidade}</b> x ${product.nome}<br>Total: <b>R$ ${total}</b>`,
+                icon: 'success',
+                confirmButtonText: 'Ok'
+            }).then(() => {
+                closeSellModal();
+                if (document.getElementById('products-container')) renderProducts();
+                if (document.getElementById('sales-count')) updateReportCounts();
+            });
+        }
+    });
 }
+
 
 // Report operations
 function updateReportCounts() {
@@ -324,9 +393,15 @@ function updateReportCounts() {
 
 function exportSalesCSV() {
     if (!state.vendas.length) {
-        alert('Nenhuma venda registrada');
+        Swal.fire({
+            title: 'Nenhuma venda registrada',
+            text: 'Não há dados para exportar no momento.',
+            icon: 'info',
+            confirmButtonText: 'Ok'
+        });
         return;
     }
+
     const csv = arrayToCSV(state.vendas, [
         { label: 'ID Produto', key: 'productId' },
         { label: 'Nome', key: 'nome' },
@@ -335,14 +410,38 @@ function exportSalesCSV() {
         { label: 'Total', key: 'total' },
         { label: 'Data', key: 'date' }
     ]);
-    downloadFile('vendas.csv', csv);
+
+    Swal.fire({
+        title: 'Exportar vendas?',
+        text: 'O arquivo "vendas.csv" será gerado para download.',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Exportar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            downloadFile('vendas.csv', csv);
+            Swal.fire({
+                title: 'Exportação concluída!',
+                text: 'O arquivo "vendas.csv" foi gerado com sucesso.',
+                icon: 'success',
+                confirmButtonText: 'Ok'
+            });
+        }
+    });
 }
 
 function exportNewProductsCSV() {
     if (!state.novos.length) {
-        alert('Nenhum produto novo registrado');
+        Swal.fire({
+            title: 'Nenhum produto novo',
+            text: 'Não há produtos novos para exportar.',
+            icon: 'info',
+            confirmButtonText: 'Ok'
+        });
         return;
     }
+
     const csv = arrayToCSV(state.novos, [
         { label: 'ID', key: 'id' },
         { label: 'Nome', key: 'nome' },
@@ -352,27 +451,107 @@ function exportNewProductsCSV() {
         { label: 'Descrição', key: 'descricao' },
         { label: 'Criado em', key: 'createdAt' }
     ]);
-    downloadFile('produtos_novos.csv', csv);
+
+    Swal.fire({
+        title: 'Exportar produtos novos?',
+        text: 'O arquivo "produtos_novos.csv" será gerado para download.',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Exportar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            downloadFile('produtos_novos.csv', csv);
+            Swal.fire({
+                title: 'Exportação concluída!',
+                text: 'O arquivo "produtos_novos.csv" foi gerado com sucesso.',
+                icon: 'success',
+                confirmButtonText: 'Ok'
+            });
+        }
+    });
 }
 
 function clearSales() {
-    if (!confirm('Limpar todas as vendas?')) return;
-    state.vendas = [];
-    localStorage.setItem(LS_VENDAS, JSON.stringify(state.vendas));
-    updateReportCounts();
+    Swal.fire({
+        title: 'Limpar todas as vendas?',
+        text: 'Esta ação apagará permanentemente o histórico de vendas.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sim, limpar tudo',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            state.vendas = [];
+            localStorage.setItem(LS_VENDAS, JSON.stringify(state.vendas));
+            updateReportCounts();
+
+            Swal.fire({
+                title: 'Vendas limpas!',
+                text: 'Todo o histórico de vendas foi removido.',
+                icon: 'success',
+                confirmButtonText: 'Ok'
+            });
+        }
+    });
 }
 
 function clearNewProducts() {
-    if (!confirm('Limpar produtos novos?')) return;
-    state.novos = [];
-    localStorage.setItem(LS_NOVOS, JSON.stringify(state.novos));
-    updateReportCounts();
+    Swal.fire({
+        title: 'Limpar produtos novos?',
+        text: 'Todos os produtos adicionados recentemente serão removidos.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sim, limpar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            state.novos = [];
+            localStorage.setItem(LS_NOVOS, JSON.stringify(state.novos));
+            updateReportCounts();
+
+            Swal.fire({
+                title: 'Produtos removidos!',
+                text: 'A lista de produtos novos foi esvaziada.',
+                icon: 'success',
+                confirmButtonText: 'Ok'
+            });
+        }
+    });
 }
 
 function exportJSON() {
-    const data = JSON.stringify(state.produtos, null, 2);
-    downloadFile('produtos.json', data);
+    if (!state.produtos.length) {
+        Swal.fire({
+            title: 'Nenhum produto disponível',
+            text: 'Não há produtos para exportar.',
+            icon: 'info',
+            confirmButtonText: 'Ok'
+        });
+        return;
+    }
+
+    Swal.fire({
+        title: 'Exportar produtos?',
+        text: 'O arquivo "produtos.json" será gerado para download.',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Exportar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const data = JSON.stringify(state.produtos, null, 2);
+            downloadFile('produtos.json', data);
+            Swal.fire({
+                title: 'Exportação concluída!',
+                text: 'O arquivo "produtos.json" foi gerado com sucesso.',
+                icon: 'success',
+                confirmButtonText: 'Ok'
+            });
+        }
+    });
 }
+
 
 // Settings operations
 function loadSettings() {
@@ -411,7 +590,6 @@ function updateSidebarPreview() {
     const end = endEl ? endEl.value : null;
     if (preview && start && end) preview.style.background = `linear-gradient(180deg, ${start}, ${end})`;
 }
-
 function saveTheme() {
     const theme = {
         pageBg: (document.getElementById('color-page-bg') || {}).value,
@@ -420,20 +598,46 @@ function saveTheme() {
     };
     localStorage.setItem(THEME_KEY, JSON.stringify(theme));
     applyTheme();
-    alert('Configurações salvas');
+
+    Swal.fire({
+        title: 'Tema salvo!',
+        text: 'As configurações de cor foram atualizadas com sucesso.',
+        icon: 'success',
+        confirmButtonText: 'Ok'
+    });
 }
 
 function resetTheme() {
-    const defaults = {
-        pageBg: '#f4f6fb',
-        sidebarStart: '#118ca1',
-        sidebarEnd: '#212c1d'
-    };
-    const pg = document.getElementById('color-page-bg'); if (pg) pg.value = defaults.pageBg;
-    const ss = document.getElementById('color-sidebar-start'); if (ss) ss.value = defaults.sidebarStart;
-    const se = document.getElementById('color-sidebar-end'); if (se) se.value = defaults.sidebarEnd;
-    localStorage.removeItem(THEME_KEY);
-    applyTheme();
+    Swal.fire({
+        title: 'Redefinir tema?',
+        text: 'As cores serão restauradas para o padrão do sistema.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sim, redefinir',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const defaults = {
+                pageBg: '#f4f6fb',
+                sidebarStart: '#118ca1',
+                sidebarEnd: '#212c1d'
+            };
+
+            const pg = document.getElementById('color-page-bg'); if (pg) pg.value = defaults.pageBg;
+            const ss = document.getElementById('color-sidebar-start'); if (ss) ss.value = defaults.sidebarStart;
+            const se = document.getElementById('color-sidebar-end'); if (se) se.value = defaults.sidebarEnd;
+
+            localStorage.removeItem(THEME_KEY);
+            applyTheme();
+
+            Swal.fire({
+                title: 'Tema redefinido!',
+                text: 'As cores voltaram ao padrão.',
+                icon: 'success',
+                confirmButtonText: 'Ok'
+            });
+        }
+    });
 }
 
 function applyTheme() {
@@ -446,6 +650,7 @@ function applyTheme() {
     document.documentElement.style.setProperty('--sidebar-start', sidebarStart);
     document.documentElement.style.setProperty('--sidebar-end', sidebarEnd);
 }
+
 
 // Utility functions
 function escapeHtml(text) {
